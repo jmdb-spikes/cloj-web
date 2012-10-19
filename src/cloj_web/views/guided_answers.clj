@@ -46,7 +46,9 @@
          (not (= nil currentQ))
          (contains? applicationForm :next))
       (+ (Integer/parseInt currentQ) 1)
-      1)))
+      (if (= nil currentQ)
+        2
+        currentQ))))
 
 
 (defn key-starts-with [prefix mapEntry]
@@ -77,18 +79,27 @@
      (contains? activeIds questionId)
      (and
       (empty? activeIds)
-      (= questionId defaultQuestion)))))
+      (or
+       (= questionId (:question formData))
+       (and
+        (nil? (:question formData))
+        (= questionId defaultQuestion)))))))
+
 
 ;; (def formData-1
-;;   {:question "2"
+;;   {:question "3"
 ;;    :active-2 "Change+Answer"})
 
 ;; (def formData-2
 ;;   {:question "2"})
 
-;; (is-question-active? formData-1 "1" "1")
-;; (is-question-active? formData-2 "3" "1")
-;;(def keys (keys-starting-with ":active" formData))
+;; (def formData-3
+;;   {})
+
+;; (is-question-active? formData-1 "3" "1")
+;; (is-question-active? formData-2 "1" "1")
+;; (is-question-active? formData-3 "1" "1")
+;; (def keys (keys-starting-with ":active" formData))
 
 
 (def default-question "1")
