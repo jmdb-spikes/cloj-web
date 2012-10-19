@@ -6,7 +6,7 @@
          (common/layout
           [:h1 "Welcome to a sweet clojure application"]
           [:ul
-           [:li "Click to see a \"" [:a {:href "/smart-answer-demo"} "Smart Answer"] "\" form."]]
+           [:li "Click to see a \"" [:a {:href "/guided-answer-demo"} "Smart Answer"] "\" form."]]
           ))
 
 
