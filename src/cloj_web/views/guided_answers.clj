@@ -25,12 +25,25 @@
    (text-box "age", "Age: ", age)])
 
 
+(defn calculate-question [applicationForm]
+  (let [ currentQ (:question applicationForm)]
+       (if (= nil currentQ)
+         1
+         (+ (Integer/parseInt currentQ) 1))))
+
+;; (def demoForm
+;;   {:question "1"})
+
+;; (calculate-question demoForm)
+;; (= nil (:question demoForm))
+
 
 (defpage [:get "/guided-answer-demo"] {:as applicationForm}
   (common/layout
    [:h1 "Please fill out this form:"]
    [:div.guide
     (form-to [:post "/guided-answer-demo" {:class "form-top"}]
+             (text-field "question", (calculate-question applicationForm))
              (question-1 applicationForm)
              (question-2 applicationForm)
              (submit-button "Next->"))]))
