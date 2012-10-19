@@ -6,7 +6,7 @@
             (html5
               [:head
                [:title "cloj-web"]
-               (include-css "/css/reset.css")]
+               (include-css "/css/site.css")]
               [:body
                [:div#wrapper
                 content]]))
