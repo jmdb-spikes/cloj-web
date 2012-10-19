@@ -12,8 +12,13 @@
     (label id label-text)
     (text-field id data)])
 
+
+(defn named-submit-button [name value]
+  [:input {:type "submit" :value value :name name}])
+
 (defn section-button [questionId]
-  [:input {:type "submit" :value "Change Answer" :name (format "active-%s" questionId)}])
+  (named-submit-button (format "active-%s" questionId) "Change Answer"))
+
 
 
 (defpartial question-1 [{:keys [firstname lastname]} active?]
@@ -37,16 +42,11 @@
 
 (defn calculate-question [applicationForm]
   (let [currentQ (:question applicationForm)]
-       (if (= nil currentQ)
-         1
-         (+ (Integer/parseInt currentQ) 1))))
-
-(def demoForm
-  {:question "1"
-   :active-1 "Change+Answer"})
-
-(defn is-active [formData]
-  )
+    (if (and
+         (not (= nil currentQ))
+         (contains? applicationForm :next))
+      (+ (Integer/parseInt currentQ) 1)
+      1)))
 
 
 (defn key-starts-with [prefix mapEntry]
@@ -55,26 +55,43 @@
 (defn str-key [mapEntry]
   (str (key mapEntry)))
 
-
-(defn active-keys [aMap]
-  (map str-key (filter #(key-starts-with ":active" %1) demoForm)))
+(defn keys-starting-with [prefix aMap]
+  (map str-key (filter #(key-starts-with prefix %1) aMap)))
 
 (defn question-id-from [keyName]
   (last (seq (.split keyName "-"))))
 
-
-
-(map question-id-from (active-keys demoForm))
-
-
+(defn question-ids-from [keys]
+  (set (map question-id-from keys)))
 
 
 
-(seq (.split "a-1" "-"))
+(defn is-question-active?
+  "Determines wether the formdata indicates that this question is 'active'
+    i.e. it should have the key :active-<questionId> in it.
+    If its not there, it might be the default so we also check that."
+  [formData questionId defaultQuestion]
+
+  (let [activeIds (question-ids-from (keys-starting-with ":active" formData))]
+    (or
+     (contains? activeIds questionId)
+     (and
+      (empty? activeIds)
+      (= questionId defaultQuestion)))))
+
+;; (def formData-1
+;;   {:question "2"
+;;    :active-2 "Change+Answer"})
+
+;; (def formData-2
+;;   {:question "2"})
+
+;; (is-question-active? formData-1 "1" "1")
+;; (is-question-active? formData-2 "3" "1")
+;;(def keys (keys-starting-with ":active" formData))
 
 
-
-
+(def default-question "1")
 
 (defpage [:get "/guided-answer-demo"] {:as formData}
   (common/layout
@@ -82,9 +99,9 @@
    [:div.guide
     (form-to [:post "/guided-answer-demo" {:class "form-top"}]
              (text-field "question", (calculate-question formData))
-             (question-1 formData (is-active? formData "1"))
-             (question-2 formData (is-active? formData "2"))
-             (submit-button "Next->"))]))
+             (question-1 formData (is-question-active? formData "1" default-question))
+             (question-2 formData (is-question-active? formData "2" default-question))
+             (named-submit-button "next" "Next->"))]))
 
 (defpage [:post "/guided-answer-demo"] {:as formData}
   (redirect (url "/guided-answer-demo" formData)))
