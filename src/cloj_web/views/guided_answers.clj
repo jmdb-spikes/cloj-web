@@ -31,13 +31,33 @@
    (section-button "1")])
 
 (defpartial question-2 [{:keys [age]} active?]
-  [:fieldset#question-1
+  [:fieldset#question-2
    [:legend "Your age"]
    (if active?
      (label "active" "I AM ACTIVE !!!!!!!!!"))
    (text-box "age", "Age: ", age)
    (:input "Edit")
    (section-button "2")])
+
+
+(defn yes-no-question [name value]
+  [:ul
+   [:li
+    [:label {:for name} "Yes"
+     [:input {:type "radio" :name name :value "yes" :checked (= "yes" value)}]]]
+   [:li
+    [:label {:for name} "No"
+     [:input {:type "radio" :name name :value "no" :checked (= "no" value)}]]]
+   ])
+
+
+(defpartial question-3 [{:keys [likesFish]} active?]
+  [:fieldset#question-3
+   [:legend "Do you like fish?"]
+   (if active?
+     (label "active" "I AM ACTIVE !!!!!!"))
+   (yes-no-question "likesFish" likesFish)
+   (section-button "3")])
 
 
 (defn calculate-question [applicationForm]
@@ -112,6 +132,7 @@
              (text-field "question", (calculate-question formData))
              (question-1 formData (is-question-active? formData "1" default-question))
              (question-2 formData (is-question-active? formData "2" default-question))
+             (question-3 formData (is-question-active? formData "3" default-question))
              (named-submit-button "next" "Next->"))]))
 
 (defpage [:post "/guided-answer-demo"] {:as formData}
