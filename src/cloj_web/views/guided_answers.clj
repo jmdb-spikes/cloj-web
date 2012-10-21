@@ -116,7 +116,7 @@
 ;;   {:question "3"
 ;;    :active-2 "Change+Answer"})
 
-;; (def formData-2
+;; (def formData
 ;;   {:question "2"})
 
 ;; (def formData-3
@@ -142,6 +142,23 @@
              (question-3 formData (is-question-active? formData "3" default-question))
              (named-submit-button "next" "Next->"))]))
 
-(defpage [:post "/guided-answer-demo"] {:as formData}
-  (redirect (url "/guided-answer-demo" formData)))
 
+(defpage [:post "/guided-answer-demo"] {:as formData}
+  (let [questionId (:question formData)]
+    (if (and
+         (= questionId "4")
+         (empty? (keys-starting-with ":active" formData)))
+      (redirect (format "/guided-answer-demo/success?next=%s" "/applications/fhe787638723e"))
+      (redirect (url "/guided-answer-demo" formData)))))
+
+(defpage [:get "/guided-answer-demo/success"] {:as formData}
+  (common/layout
+   [:h1 "Great, you qualify for our exciting offer!"]
+   [:div.info
+    [:p "We need to gather a few more details from you, please "
+     [:a { :href (:next formData)} "click here"] "."]]))
+
+(defpage [:get "/applications/:id"] {:keys [id]}
+  (common/layout
+   [:h1 "Ok, we now have an application form to fill out..."]
+   [:p1 "The id is : " id]))
