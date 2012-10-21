@@ -12,6 +12,15 @@
     (label id label-text)
     (text-field id data)])
 
+(defn yes-no-question [name value]
+  [:ul
+   [:li
+    [:label {:for name} "Yes"
+     [:input {:type "radio" :name name :value "yes" :checked (= "yes" value)}]]]
+   [:li
+    [:label {:for name} "No"
+     [:input {:type "radio" :name name :value "no" :checked (= "no" value)}]]]])
+
 
 (defn named-submit-button [name value]
   [:input {:type "submit" :value value :name name}])
@@ -40,15 +49,6 @@
    (section-button "2")])
 
 
-(defn yes-no-question [name value]
-  [:ul
-   [:li
-    [:label {:for name} "Yes"
-     [:input {:type "radio" :name name :value "yes" :checked (= "yes" value)}]]]
-   [:li
-    [:label {:for name} "No"
-     [:input {:type "radio" :name name :value "no" :checked (= "no" value)}]]]
-   ])
 
 
 (defpartial question-3 [{:keys [likesFish]} active?]
@@ -59,13 +59,19 @@
    (yes-no-question "likesFish" likesFish)
    (section-button "3")])
 
+(defn increment-question-number
+  "Increments the question number upto a maximum of number of questions"
+  [currentQ numberOfQuestions]
+  (min
+   (+ numberOfQuestions 1)
+   (+ currentQ 1)))
 
-(defn calculate-question [applicationForm]
+(defn calculate-question [applicationForm numberOfQuestions]
   (let [currentQ (:question applicationForm)]
     (if (and
          (not (= nil currentQ))
          (contains? applicationForm :next))
-      (+ (Integer/parseInt currentQ) 1)
+      (increment-question-number (Integer/parseInt currentQ) numberOfQuestions)
       (if (= nil currentQ)
         2
         currentQ))))
@@ -129,7 +135,8 @@
    [:h1 "Please fill out this form:"]
    [:div.guide
     (form-to [:post "/guided-answer-demo" {:class "form-top"}]
-             (text-field "question", (calculate-question formData))
+             (label "foo" "Next question is:")
+             (text-field "question", (calculate-question formData 3))
              (question-1 formData (is-question-active? formData "1" default-question))
              (question-2 formData (is-question-active? formData "2" default-question))
              (question-3 formData (is-question-active? formData "3" default-question))
