@@ -1,6 +1,8 @@
 (ns cloj-web.wedding_pictures
   (:require [net.cgrand.enlive-html :as html]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            clojure.java.io
+            [clojure.string :as string]))
 
 
 
@@ -10,6 +12,28 @@
 
 (def jim-and-romina (set/intersection (set jim-selected) (set romina-selected)))
 
+
+(defn img-url [index]
+  (format "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/hu1HVNed_w#f:jr%s.jpg" index))
+
+
+(defn fetch-url [url]
+  (html/html-resource (io/as-url url)))
+
+(defn extract-raw-img-from [gallery-url item-url]
+  (:data-src (:attrs (first (html/select (fetch-url gallery-url) [:div#gallery-view-container (html/attr= :href item-url) :img])))))
+
+
+"https://www.dropbox.com/sh/ok8x0rvwu0i3eox/IdapoWpzSs/jr375.jpg"
+"https://www.dropbox.com/sh/ok8x0rvwu0i3eox/hu1HVNed_w#/"
+
+(extract-raw-img-from "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/hu1HVNed_w#/" "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/IdapoWpzSs/jr375.jpg")
+
+(html/select (fetch-url gallery-url) [:div#gallery-view-container (html/attr= :href item-url) :img])
+
+(def somehtml (html/html-snippet "<html><body><a href='foo'>some link</a></body></html>")) 
+
+
 (defn list-item [index]
   (format "<li><img src='%s' width='100px' /></li>" (img-url index)))
 
@@ -17,28 +41,25 @@
 (defn list-of-images [selected]
   (map list-item (sort (seq selected))))
 
-(defn img-url [index]
-  (format "https://photos-6.dropbox.com/t/0/AADpkBBd2clk7Nd1LKx4xIfUSu681-b9tK9tGjtGY7jOgw/10/35623490/jpeg/32x32/2/1354100400/0/2/jr%s.jpg/g_tcUQd4w_eWNJ_s53Ee7jfi8QE_ufVyrLmGNoyZrMM?size=200x200" index))
 
 
 (defn web-page [selected]
-  (format "<html><body><ul>%s</ul></body></html>"  (clojure.string/join (list-of-images selected))))
+  (format "<html><body><ul>%s</ul></body></html>"  (string/join (list-of-images selected))))
 
 (defn replace-home-dir [path]
-  (clojure.string/replace path "~" (System/getProperty "user.home")))
+  (string/replace path "~" (System/getProperty "user.home")))
 
 (defn expand-path [path]
-  (-> (file (replace-home-dir path)) .getAbsolutePath))
+  (-> (io/file (replace-home-dir path)) .getAbsolutePath))
 
 (defn create-page [content]
-  (with-open [wrtr (writer (file (expand-path "~/Desktop") "selected-images.html") :append true)]
-    (.write wrtr content)))
+  (let [filename (io/file (expand-path "~/Desktop") "selected-images.html")]
+    ;;(io/delete-file filename :silent true)
+    (with-open [wrtr (io/writer filename :append false)]
+      (.write wrtr content))))
 
-(create-page (web-page jim-and-romina))
+;; (create-page (web-page jim-and-romina))
 
-(list-of-images (sort jim-and-romina))
 
-(map print (seq jim-and-romina))
 
-(apply print (sort (seq jim-and-romina)))
 
