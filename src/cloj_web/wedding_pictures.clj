@@ -1,0 +1,44 @@
+(ns cloj-web.wedding_pictures
+  (:require [net.cgrand.enlive-html :as html]
+            [clojure.set :as set]))
+
+
+
+(def jim-selected [5,7,12,13,15,17,19,22,23,24,28,30,33,35,38,39,44,49,50,54,55,56,59,61,62,63,64,67,68,69,71,74,76,77,78,79,80,81,82,85,91,93,95,97,98,99,101,106,107,108,110,112,113,114,116,118,120,122,125,127,130,131,132,135,137,138,139,140,142,143,144,145,146,147,151,153,154,155,156,157,159,160,162,,164,166,174,176,177,180,182,184,186,187,188,189,192,195,196,198,201,206,209,211,214,215,217,220,222,224,225,226,227,229,230,231,232,233,234,235,237,238,239,240,241,242,243,244,246,247,250,253,254,255,258,259,261,262,263,264,266,268,269,270,271,272,273,274,276,278,279,280,282,284,285,287,291,292,293,294,295,296,299,300,301,303,304,305,307,308,311,312,314,316,317,319,324,327,331,333,335,337,339,341,344,346,349,350,351,353,354,355,356,357,358,359,360,361,363,366,367,368,370,372,373,375])
+
+(def romina-selected [8, 12,16,54,56,57,59,63,66,79,97,98,106,110,112,113,114,115,117,118,123,125,126,127,128,129,130,131,132,136,138,140,142,151,152,156,157,159,166,189,191,192,198,206,214,215,217,218,220,222,225,233,234,237,238,244,253,254,271,276,300,311,313,315,316,321,328,340,315,316,321,338,340,343,357,358,362,363,366,367,368,373,375])
+
+(def jim-and-romina (set/intersection (set jim-selected) (set romina-selected)))
+
+(defn list-item [index]
+  (format "<li><img src='%s' width='100px' /></li>" (img-url index)))
+
+
+(defn list-of-images [selected]
+  (map list-item (sort (seq selected))))
+
+(defn img-url [index]
+  (format "https://photos-6.dropbox.com/t/0/AADpkBBd2clk7Nd1LKx4xIfUSu681-b9tK9tGjtGY7jOgw/10/35623490/jpeg/32x32/2/1354100400/0/2/jr%s.jpg/g_tcUQd4w_eWNJ_s53Ee7jfi8QE_ufVyrLmGNoyZrMM?size=200x200" index))
+
+
+(defn web-page [selected]
+  (format "<html><body><ul>%s</ul></body></html>"  (clojure.string/join (list-of-images selected))))
+
+(defn replace-home-dir [path]
+  (clojure.string/replace path "~" (System/getProperty "user.home")))
+
+(defn expand-path [path]
+  (-> (file (replace-home-dir path)) .getAbsolutePath))
+
+(defn create-page [content]
+  (with-open [wrtr (writer (file (expand-path "~/Desktop") "selected-images.html") :append true)]
+    (.write wrtr content)))
+
+(create-page (web-page jim-and-romina))
+
+(list-of-images (sort jim-and-romina))
+
+(map print (seq jim-and-romina))
+
+(apply print (sort (seq jim-and-romina)))
+

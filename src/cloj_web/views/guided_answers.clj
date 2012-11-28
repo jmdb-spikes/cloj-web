@@ -29,7 +29,6 @@
   (named-submit-button (format "active-%s" questionId) "Change Answer"))
 
 
-
 (defpartial question-1 [{:keys [firstname lastname]} active?]
   [:fieldset#question-1
    [:legend "Your name"]
