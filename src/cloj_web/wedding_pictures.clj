@@ -44,7 +44,9 @@
 ;;(re-groups matcher)
 
 (defn get-image-id-from-url [img-url]
-  (Integer/parseInt (get (re-find #".*(jr)(\d\d\d)(\.jpg).*" img-url) 2)))
+  (-> (re-find #".*(jr)(\d\d\d)(\.jpg).*" img-url)       
+      (get 2)
+      Integer/parseInt))
 
 
 (re-find #".*" img-url)
