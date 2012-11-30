@@ -44,12 +44,10 @@
 (defn list-item [index map-of-img-urls]
   (format "<li><img src='%s' width='100px' /></li>" (get map-of-img-urls index)))
 
-(defn process-img-map [selected map-of-img-urls]
-  (map #(list-item % map-of-img-urls) (sort (seq selected))))
 
 (defn list-of-images [resource selected]
   (let [map-of-img-urls (make-map (get-list-of-img-urls resource))]
-    (process-img-map selected map-of-img-urls)))
+    (map #(list-item % map-of-img-urls) (sort (seq selected)))))
 
 
 (defn web-page [resource selected]
@@ -63,7 +61,7 @@
 
 (defn create-page [content]
   (let [filename (io/file (expand-path "~/Desktop") "selected-images.html")]
-    ;;(io/delete-file filename :silent true)
+    (io/delete-file filename :silent true)
     (with-open [wrtr (io/writer filename :append false)]
       (.write wrtr content))))
 
