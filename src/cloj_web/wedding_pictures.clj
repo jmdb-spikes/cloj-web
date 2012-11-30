@@ -14,34 +14,50 @@
 
 
 (defn img-url [index]
-  (format "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/hu1HVNed_w#f:jr%s.jpg" index))
+  (format "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/hu1HVNed_w#f:jr%03d.jpg" index))
 
 
 (defn fetch-url [url]
   (html/html-resource (io/as-url url)))
 
-(defn extract-raw-img-from [gallery-url item-url]
-  (:data-src (:attrs (first (html/select (fetch-url gallery-url) [:div#gallery-view-container (html/attr= :href item-url) :img])))))
+(defn extract-raw-img-from [resource item-url]
+  (:data-src (:attrs (first (html/select resource [:div#gallery-view-container (html/attr= :href item-url) :img])))))
+
+(defn extract-list-of-imgs [resource]
+  (let [resource resource]
+    (html/select resource [:div#gallery-view-container :img])))
+
+(defn get-img-url [link-tag]
+  (:data-src (:attrs link-tag)))
+
+(defn get-list-of-img-urls [resource]
+  (map get-img-url (extract-list-of-imgs resource)))
+
+;;(:data-src (:attrs (first (:content link-tag))))
+;;(def link-tag (first (html/select resource [:div#gallery-view-container :img])))
+;;(extract-raw-img-from "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/hu1HVNed_w#/" "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/IdapoWpzSs/jr375.jpg")
+;;"https://photos-6.dropbox.com/t/0/AABkkQtYaANLULGxDMwZ9mXcb3F-x23ZnVFm5ZdR1tyCQw/10/35623490/jpeg/178x178/1/1354222800/0/2/jr001.jpg/-6Q8N7JsYumGhHHN-CRNeDK0LuML_R9s1DQypLyuRnQ"
+
+;;(def img-url "https://photos-6.dropbox.com/t/0/AABkkQtYaANLULGxDMwZ9mXcb3F-x23ZnVFm5ZdR1tyCQw/10/35623490/jpeg/178x178/1/1354222800/0/2/jr001.jpg/-6Q8N7JsYumGhHHN-CRNeDK0LuML_R9s1DQypLyuRnQ")
+;;(def matcher (re-matcher #".*(jr)(\d\d\d)(\.jpg).*" img-url))
+;;(re-find matcher)
+;;(re-groups matcher)
+
+(defn get-image-id-from-url [img-url]
+  (Integer/parseInt (get (re-find #".*(jr)(\d\d\d)(\.jpg).*" img-url) 2)))
 
 
-"https://www.dropbox.com/sh/ok8x0rvwu0i3eox/IdapoWpzSs/jr375.jpg"
-"https://www.dropbox.com/sh/ok8x0rvwu0i3eox/hu1HVNed_w#/"
+(re-find #".*" img-url)
 
-(extract-raw-img-from "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/hu1HVNed_w#/" "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/IdapoWpzSs/jr375.jpg")
-
-(html/select (fetch-url gallery-url) [:div#gallery-view-container (html/attr= :href item-url) :img])
-
-(def somehtml (html/html-snippet "<html><body><a href='foo'>some link</a></body></html>")) 
+(defn list-item [index resource]
+  (format "<li><img src='%s' width='100px' /></li>" (extract-raw-img-from resource (img-url index))))
 
 
-(defn list-item [index]
-  (format "<li><img src='%s' width='100px' /></li>" (img-url index)))
+(defn list-of-images [gallery-url selected]
+  (let [resource (fetch-url gallery-url)]
+    (map list-item (sort (seq selected)) resource)))
 
-
-(defn list-of-images [selected]
-  (map list-item (sort (seq selected))))
-
-
+(def resource (fetch-url "https://www.dropbox.com/sh/ok8x0rvwu0i3eox/hu1HVNed_w#/"))
 
 (defn web-page [selected]
   (format "<html><body><ul>%s</ul></body></html>"  (string/join (list-of-images selected))))
