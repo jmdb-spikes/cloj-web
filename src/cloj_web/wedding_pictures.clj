@@ -68,10 +68,8 @@
 (defn create-page 
   "e.g (create-page (web-page (fetch-url *gallery-url*) jim-and-romina) \"selected-images.html\")"
   [content filename] 
-  (let [filename (io/file (expand-path "~/Desktop") filename)]
-    (io/delete-file filename :silent true)
-    (with-open [wrtr (io/writer filename :append false)]
-      (-> wrtr (.write content)))))
+  (let [file (io/file (expand-path "~/Desktop") filename)]    
+    (spit file content)))
 
 
  
